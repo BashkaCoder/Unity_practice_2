@@ -1,2 +1,2 @@
 # Unity_practice_2
-Anonym methods and delegates
+Practice dedicated to learning anonymous methods and delegates in Unity.
