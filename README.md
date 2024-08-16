@@ -4,8 +4,8 @@
 уже созданных в C# использовать свои собственные.
 
 # Выполнение:
-- [EntryPoint.cs](https://github.com/BashkaCoder/Unity_practice_2/blob/Task1/Assets/Scripts/EntryPoint.cs)
-- [UiAnimations.cs](https://github.com/BashkaCoder/Unity_practice_2/blob/Task1/Assets/Scripts/UiAnimations.cs)
+- [EntryPoint.cs](https://github.com/BashkaCoder/Unity_practice_2/blob/Task3/Assets/Scripts/EntryPoint.cs)
+- [MyObjectPool.cs](https://github.com/BashkaCoder/Unity_practice_2/blob/Task3/Assets/Scripts/MyObjectPool.cs)
 
 # Итог:
 Таска была выполнена. Были созданы следующие делегаты:
@@ -52,7 +52,8 @@
           onDeinit: new StringInDelegate<MyObject>(DeinitializeObjectWithString)
           );
 
-* **_CreateDelegate_** представляет собой делегат, который принимает один параметр типа int и возвращает объект типа T. Здесь out T указывает, что делегат возвращает объект типа T, но не принимает параметры типа T на входе (то есть, T используется только как возвращаемый тип).
+* **_CreateDelegate_** представляет собой делегат, который принимает один параметр типа int и возвращает объект типа T. 
+Здесь out T указывает, что делегат возвращает объект типа T, но не принимает параметры типа T на входе (то есть, T используется только как возвращаемый тип). Также out T и то, что T возвращаемый тип свидетельствует о ковариантности.
 
   Примеры использования
   * _Создание объекта_: Делегат можно использовать для создания нового объекта типа T с использованием целочисленного параметра, который может быть использован в процессе создания.
