@@ -1,42 +1,61 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class EntryPoint : MonoBehaviour
 {
-    [SerializeField] private float _duration;
-    
-    [Header("UI Components")]
-    [SerializeField] private Image _image;
-    [SerializeField] private Button _hideButton;
-    [SerializeField] private Button _revealButton;
-
     private void Start()
     {
-        //Named method
-        _hideButton.onClick.AddListener(() =>
-        {
-            StopAllCoroutines();
-            StartCoroutine(UiAnimations.AnimateFadeOut(_duration, HideImage));
-        });
+        var myPool = CreateTestPool();
         
-        //Anonymous method
-        _revealButton.onClick.AddListener(() =>
-        {
-            StopAllCoroutines();
-            StartCoroutine(UiAnimations.AnimateFadeIn(_duration, () => Debug.Log("Image has been revealed")));
-            //OR with raw delegate
-            // StartCoroutine(UiAnimations.AnimateFadeIn(_duration, delegate()
-            // {
-            //     Debug.Log("Image has been revealed");
-            // }));
-        });
-        
-        UiAnimations.Initialize(_image);
+        TestPool(myPool);
+    } 
+    
+    private MyObjectPool<TestObject> CreateTestPool()
+    {
+        //Note: Консутруктор с дискардами(_) на месте неиспользуемого T(TestObject)
+        return new MyObjectPool<TestObject>(
+            createFunc: () => new TestObject(),
+            initFunc: (_) => InitTestObject(),
+            deInitFunc: (obj) => obj.Denitialize(),
+            actionOnRelease: (_) => Debug.Log("Release"),
+            actionOnDestroy: (_) => Debug.Log("Destroy"),
+            collectionCheck: true,
+            defaultCapacity: 5,
+            maxSize: 15
+        );
     }
 
-    private void HideImage()
+    private void TestPool(MyObjectPool<TestObject> myPool)
     {
-        _image.gameObject.SetActive(false);
-        Debug.Log("Image has been hidden");
+        // Проверка взятия
+        var obj1 = myPool.Get();
+        var obj2 = myPool.Get();
+        Debug.Log($"CountActive after getting objects: {myPool.CountActive}");
+        
+        // Проверка релиза
+        myPool.Release(obj1);
+        myPool.Release(obj2);
+        Debug.Log($"CountInactive after releasing objects: {myPool.CountInactive}");
+        
+        // Проверка уничтожения при переполнении
+        for (int i = 0; i < 15; i++)
+        {
+            myPool.Release(new TestObject());
+        }
+        Debug.Log($"CountInactive after adding more objects: {myPool.CountInactive}");
+
+        // Очистка пула
+        myPool.Clear();
+        Debug.Log($"CountAll after clearing: {myPool.CountAll}");
+    }
+    
+    private void InitTestObject()
+    {
+        Debug.Log("Test object initialized");
     }
 }
+
+public class TestObject
+{
+    //public void Initialize() => Debug.Log("Test object initialized");
+    public void Denitialize() => Debug.Log("Test object deinitialized");
+} 
