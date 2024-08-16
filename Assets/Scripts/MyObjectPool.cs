@@ -1,14 +1,20 @@
 using System;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
+
+public delegate void BlankDelegate<in T>(T t);
+public delegate void StringInDelegate<in T>(T t, string s);
+public delegate T CreateDelegate<out T>(int num);
+
 
 public class MyObjectPool<T> : IDisposable
   {
     private readonly List<T> _list;
-    private readonly Func<T> _createFunc;
-    private readonly Action<T> _initFunc;  
-    private readonly Action<T> _deInitFunc;
-    private readonly Action<T> _actionOnRelease;
-    private readonly Action<T> _actionOnDestroy;
+    private readonly CreateDelegate<T> _createFunc;
+    private readonly StringInDelegate<T> _initFunc;  
+    private readonly StringInDelegate<T> _deInitFunc;
+    private readonly BlankDelegate<T> _actionOnRelease;
+    private readonly BlankDelegate<T> _actionOnDestroy;
     private readonly int _maxSize;
     private readonly bool _collectionCheck;
  
@@ -19,11 +25,11 @@ public class MyObjectPool<T> : IDisposable
     public int CountInactive => _list.Count;
 
     public MyObjectPool(
-      Func<T> createFunc,
-      Action<T> initFunc = null,   
-      Action<T> deInitFunc = null,     
-      Action<T> actionOnRelease = null,
-      Action<T> actionOnDestroy = null,
+      CreateDelegate<T> createFunc,
+      StringInDelegate<T> initFunc = null,   
+      StringInDelegate<T> deInitFunc = null,     
+      BlankDelegate<T> actionOnRelease = null,
+      BlankDelegate<T> actionOnDestroy = null,
       bool collectionCheck = true,
       int defaultCapacity = 10,
       int maxSize = 10000)
@@ -48,7 +54,7 @@ public class MyObjectPool<T> : IDisposable
       T obj;
       if (_list.Count == 0)
       {
-        obj = _createFunc();
+        obj = _createFunc(Random.Range(1, 100));
         ++CountAll;
       }
       else
@@ -58,7 +64,7 @@ public class MyObjectPool<T> : IDisposable
         _list.RemoveAt(index);
       }
       
-      _initFunc?.Invoke(obj);
+      _initFunc?.Invoke(obj, "ABOBA | INIT");
       
       return obj;
     }
@@ -73,7 +79,7 @@ public class MyObjectPool<T> : IDisposable
             throw new InvalidOperationException("Trying to release an object that has already been released to the pool.");
         }
       }
-      _deInitFunc?.Invoke(element);
+      _deInitFunc?.Invoke(element, "ABOBA | DEINIT");
       _actionOnRelease?.Invoke(element);
       
       if (CountInactive < _maxSize) 

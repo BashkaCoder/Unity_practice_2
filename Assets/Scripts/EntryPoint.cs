@@ -13,17 +13,24 @@ public class EntryPoint : MonoBehaviour
     {
         //Note: Консутруктор с дискардами(_) на месте неиспользуемого T(TestObject)
         return new MyObjectPool<TestObject>(
-            createFunc: () => new TestObject(),
-            initFunc: (_) => InitTestObject(),
-            deInitFunc: (obj) => obj.Denitialize(),
-            actionOnRelease: (_) => Debug.Log("Release"),
-            actionOnDestroy: (_) => Debug.Log("Destroy"),
+            createFunc: (num) => Create(num),
+            initFunc: (obj, s) => obj.Initialize(s),
+            deInitFunc: (obj, s) => obj.Deinitialize(s),
+            actionOnRelease: (obj) => obj.ID = 0,
+            actionOnDestroy: (obj) => obj.ID = -1,
             collectionCheck: true,
             defaultCapacity: 5,
             maxSize: 15
         );
     }
 
+    private TestObject Create(int num)
+    {
+        var to = new TestObject();
+        to.ID = num;
+        return to;
+    }
+    
     private void TestPool(MyObjectPool<TestObject> myPool)
     {
         // Проверка взятия
@@ -47,15 +54,11 @@ public class EntryPoint : MonoBehaviour
         myPool.Clear();
         Debug.Log($"CountAll after clearing: {myPool.CountAll}");
     }
-    
-    private void InitTestObject()
-    {
-        Debug.Log("Test object initialized");
-    }
 }
 
 public class TestObject
 {
-    //public void Initialize() => Debug.Log("Test object initialized");
-    public void Denitialize() => Debug.Log("Test object deinitialized");
+    public int ID;
+    public void Initialize(string s) => Debug.Log($"Initialized object said {s}");
+    public void Deinitialize(string s) => Debug.Log($"Deinitialized object said {s}");
 } 
